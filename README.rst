@@ -20,6 +20,23 @@ in general and git_ in particular.  I like being able to track my changes
 over time, I like using a `real editor`_ on my posts, and I like having
 things happen with the smallest amount of manual intervention possibe.
 
+Configuration
+=============
+
+Gitblogger needs a configuration file to provide some critical information.
+You need to provide credentials for authenticating to Google, the name of
+your blog, and the refs gitblogger should be watching.
+
+For example::
+
+[gitblogger]
+
+username  = you@gmail.com
+password  = secret
+blog      = Your Blog Title
+
+refs      = refs/head/master
+
 .. _restructuredtext: http://docutils.sourceforge.net/rst.html
 .. _real editor: http://www.vim.org/
 .. _git: http://git-scm.org/
