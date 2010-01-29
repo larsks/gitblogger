@@ -3,6 +3,7 @@ import sys
 
 import gdata.blogger.client
 import gdata.blogger.data
+import atom
 
 class BlogError (Exception):
     pass
@@ -46,9 +47,11 @@ class Blog (object):
                 auth_token=self.client.auth_token,
                 desired_class=gdata.blogger.data.BlogPost)
         
-    def update(self, post_id, doc):
-        # find original post
-        pass
+    def update(self, post, doc):
+        post.title = atom.data.Title(type='xhtml', text=doc.title)
+        post.content = atom.data.Content(type='xhtml', text=doc.content)
+
+        return self.client.update(post)
 
     def delete(self, post_id):
         pass
