@@ -2,6 +2,7 @@ import os
 import sys
 
 import gdata.blogger.client
+import gdata.blogger.data
 
 class BlogError (Exception):
     pass
@@ -30,7 +31,7 @@ class Blog (object):
         if not self.blog:
             raise NoSuchBlogError(self.blog_name)
 
-    def post(self, doc, draft=False):
+    def add_post(self, doc, draft=False):
         post = self.client.add_post(
                 self.blog_id,
                 doc.title,
@@ -39,6 +40,12 @@ class Blog (object):
 
         return post.get_post_id()
 
+    def get_post(self, post_id):
+        return self.client.get_feed(
+                self.blog.get_post_link().href + '/%s' % post_id,
+                auth_token=self.client.auth_token,
+                desired_class=gdata.blogger.data.BlogPost)
+        
     def update(self, post_id, doc):
         # find original post
         pass
