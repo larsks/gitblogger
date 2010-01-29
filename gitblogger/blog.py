@@ -23,6 +23,8 @@ class Blog (object):
                 config.get('gitblogger', 'password'),
                 'com.oddbit.gitblogger', service='blogger')
 
+        # Iterate through blogs looking for one with the appropate 
+        # title.
         feed = self.client.get_blogs()
         for entry in feed.entry:
             if entry.title.text == self.blog_name:
