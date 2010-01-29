@@ -29,13 +29,13 @@ your blog, and the refs gitblogger should be watching.
 
 For example::
 
-[gitblogger]
+  [gitblogger]
 
-username  = you@gmail.com
-password  = secret
-blog      = Your Blog Title
+  username  = you@gmail.com
+  password  = secret
+  blog      = Your Blog Title
 
-refs      = refs/head/master
+  refs      = refs/head/master
 
 .. _restructuredtext: http://docutils.sourceforge.net/rst.html
 .. _real editor: http://www.vim.org/
