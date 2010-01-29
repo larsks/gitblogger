@@ -24,7 +24,7 @@ class RSTDoc (object):
         fields = self.etree.xpath('/document/docinfo//field')
         self.docinfo = {}
         for field in fields:
-            self.docinfo[field.find('field_name').text] \
+            self.docinfo[field.find('field_name').text.lower()] \
                     = '\n'.join([x.text for x in
                         field.find('field_body').findall('paragraph')])
 

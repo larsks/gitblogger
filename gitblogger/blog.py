@@ -33,13 +33,13 @@ class Blog (object):
             raise NoSuchBlogError(self.blog_name)
 
     def add_post(self, doc, draft=False):
-        post = self.client.add_post(
+        return self.client.add_post(
                 self.blog_id,
                 doc.title,
                 doc.content,
-                draft)
+                labels=doc.docinfo.get('tags', '').split(),
+                draft=draft)
 
-        return post.get_post_id()
 
     def get_post(self, post_id):
         return self.client.get_feed(
@@ -47,16 +47,21 @@ class Blog (object):
                 auth_token=self.client.auth_token,
                 desired_class=gdata.blogger.data.BlogPost)
         
-    def update(self, post, doc):
+    def update_post(self, post, doc):
+        '''Update title, content, and tags of the given document.  Note 
+        that tag changes are only additive.'''
+
         post.title = atom.data.Title(type='xhtml', text=doc.title)
         post.content = atom.data.Content(type='xhtml', text=doc.content)
-
+        for tag in doc.docinfo.get('tags', '').split():
+            post.add_label(tag)
         return self.client.update(post)
 
     def delete(self, post_id):
         pass
 
 if __name__ == '__main__':
+    import rstdoc
     from ConfigParser import ConfigParser
     cf = ConfigParser()
     cf.read(sys.argv[1])
