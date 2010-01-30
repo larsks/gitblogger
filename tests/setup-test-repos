@@ -10,7 +10,7 @@ mkdir repo1 repo2
 	ln -s ../../../../gitblogger/gitblogger.py .git/hooks/post-receive
 )
 
-cat conf >> repo1/.git/gitblogger.conf
+cat conf >> repo1/.git/config
 cp post*.rst repo2/
 
 (

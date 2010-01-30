@@ -5,15 +5,16 @@ import sys
 import optparse
 import git
 import subprocess
+import datetime
 from cStringIO import StringIO
+
+from configdict import ConfigDict
 
 import db
 import blog
 import utils
 import rstdoc
 from lock import Lock
-
-from ConfigParser import ConfigParser
 
 class GitError(Exception):
     pass
@@ -22,16 +23,15 @@ def parse_args():
     p = optparse.OptionParser()
     return p.parse_args()
 
-def read_config():
-    config = ConfigParser()
-    config.read('gitblogger.conf')
-    if not config.has_section('gitblogger'):
+def read_config(path):
+    config = ConfigDict(path)
+    if not 'gitblogger' in config:
         raise GitError('No [gitblogger] section in config file.')
 
     return config
 
 def post_receive_main():
-    config = read_config()
+    config = read_config('config')
 
     del os.environ['GIT_DIR']
     os.chdir('..')
@@ -46,7 +46,7 @@ def post_receive_main():
     print >>sys.stderr, 'Resetting HEAD...'
     myrepo.git.reset('--hard')
 
-    refs = config.get('gitblogger', 'refs').split()
+    refs = config['gitblogger'].get('refs', '').split()
     for line in sys.stdin:
         old, new, ref = line.strip().split()
         if ref not in refs:
@@ -109,9 +109,13 @@ def post_receive_main():
                 post = myblog.get_post(entry.post_id)
                 myblog.update_post(post, doc)
                 entry.last_commit_id = new
+                entry.updated = datetime.datetime.utcnow()
             else:
                 print 'UNKNOWN'
 
+        db.Metadata(
+                name='last_commit_id',
+                value=new)
         db.session.commit()
 
 if __name__ == '__main__':

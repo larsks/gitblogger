@@ -14,14 +14,16 @@ class NoSuchBlogError (BlogError):
 class Blog (object):
 
     def __init__ (self, config):
+        config = config['gitblogger']
         self.config = config
-        self.blog_name = config.get('gitblogger', 'blog')
+        self.blog_name = config['blog']
 
         self.client = gdata.blogger.client.BloggerClient()
         self.client.client_login(
-                config.get('gitblogger', 'username'),
-                config.get('gitblogger', 'password'),
-                'com.oddbit.gitblogger', service='blogger')
+                config['username'],
+                config['password'],
+                'com.oddbit.gitblogger',
+                service='blogger')
 
         # Iterate through blogs looking for one with the appropate 
         # title.
@@ -54,7 +56,7 @@ class Blog (object):
         that tag changes are only additive.'''
 
         post.title = atom.data.Title(type='text', text=doc.title)
-        post.content = atom.data.Content(type='xhtml', text=doc.content)
+        post.content = atom.data.Content(type='html', text=doc.content)
         for tag in doc.docinfo.get('tags', '').split():
             post.add_label(tag)
         return self.client.update(post)
