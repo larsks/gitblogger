@@ -1,0 +1,26 @@
+#!/bin/sh
+
+rm -rf repo1 repo2
+mkdir repo1 repo2
+
+(
+	echo "=== repo1 ==="
+	cd repo1
+	git init
+	ln -s ../../../../gitblogger/gitblogger.py .git/hooks/post-receive
+)
+
+cat conf >> repo1/.git/gitblogger.conf
+cp post*.rst repo2/
+
+(
+	echo "=== repo2 ==="
+	cd repo2
+	git init
+	git remote add origin ../repo1
+
+	git add post1.rst
+	git ci -m 'initial commit'
+	git push origin master
+)
+
