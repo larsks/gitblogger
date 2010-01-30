@@ -53,14 +53,14 @@ class Blog (object):
         '''Update title, content, and tags of the given document.  Note 
         that tag changes are only additive.'''
 
-        post.title = atom.data.Title(type='xhtml', text=doc.title)
+        post.title = atom.data.Title(type='text', text=doc.title)
         post.content = atom.data.Content(type='xhtml', text=doc.content)
         for tag in doc.docinfo.get('tags', '').split():
             post.add_label(tag)
         return self.client.update(post)
 
-    def delete(self, post_id):
-        pass
+    def delete(self, post):
+        return self.client.delete(post)
 
 if __name__ == '__main__':
     import rstdoc

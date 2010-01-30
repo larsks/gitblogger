@@ -5,8 +5,12 @@ import sys
 import optparse
 import git
 import subprocess
+from cStringIO import StringIO
 
 import db
+import blog
+import utils
+import rstdoc
 from lock import Lock
 
 from ConfigParser import ConfigParser
@@ -26,74 +30,87 @@ def read_config():
 
     return config
 
-class Repo(git.repo.Repo):
-    
-    def __init__ (self, config, path='.'):
-        self.config = config
-        self.path = os.path.abspath(path)
-
-        git.repo.Repo.__init__(self, self.path)
-
-    def reset(self):
-        self.git.reset('--hard')
-
-class Blog(object):
-    
-    def __init__ (self, config):
-        self.config = config
-
 def post_receive_main():
     config = read_config()
 
-    repo = Repo(config)
-    blog = Blog(config)
+    del os.environ['GIT_DIR']
+    os.chdir('..')
+    myrepo = git.repo.Repo('.')
+    print >>sys.stderr, 'Repo path:', myrepo.path
+    myblog = blog.Blog(config)
 
-    db.metadata.bind = 'sqlite:///gitblogger.sqlite'
+    db.metadata.bind = 'sqlite:///.git/gitblogger.sqlite'
     db.setup_all()
     db.create_all()
 
-#    # bring repository up-to-date
-#    print >>sys.stderr, 'Resetting HEAD...'
-#    x = os.environ['GIT_DIR']
-#    del os.environ['GIT_DIR']
-#    repo.reset()
-#    os.environ['GIT_DIR'] = x
+    print >>sys.stderr, 'Resetting HEAD...'
+    myrepo.git.reset('--hard')
 
+    refs = config.get('gitblogger', 'refs').split()
     for line in sys.stdin:
         old, new, ref = line.strip().split()
-        if ref not in config.get('gitblogger', 'refs').split():
+        if ref not in refs:
             print >>sys.stderr, 'Skipping %s: not in refs.' % ref
             continue
 
         print >>sys.stderr, 'old:', old
         print >>sys.stderr, 'new:', new
 
-        diffs = git.commit.Commit.diff(repo, old, new)
+        diffs = utils.diff_tree(myrepo, old, new)
         for diff in diffs:
-            print diff.a_path, diff.b_path, diff.new_file, diff.deleted_file, diff.renamed
+            if not diff.a_path.endswith('.rst'):
+                print >>sys.stderr, 'Unknown extension: %s' % diff.a_path
+                continue
 
             if diff.deleted_file:
                 # file was deleted; delete from blog (maybe)
                 # and remove from database.
+                print 'DELETE:', diff.a_path
+
                 entry = db.File.query.filter_by(path=diff.a_path).one()
-                print 'DELETE:', entry
+                if not entry:
+                    print >>sys.stderr, 'File not found in database:', diff.a_path
+                    continue
+
+                if entry.post_id:
+                    post = myblog.get_post(entry.post_id)
+                    if not post:
+                        print >>sys.stderr, 'Post not found on log.'
+                    else:
+                        myblog.delete(post)
+
+                entry.delete()
             elif diff.new_file:
                 # file is new; add to database, post to blog,
                 # update database with post id.
+                print 'NEW:', diff.a_path
+
+                doc = rstdoc.RSTDoc(diff.a_path)
+                post = myblog.add_post(doc)
                 entry = db.File(
                         path = diff.a_path,
                         last_commit_id = new,
+                        post_id = post.get_post_id(),
                         )
-                print 'NEW:', entry
-            elif diff.renamed:
+            elif diff.renamed_file:
                 # file was renamed; update database.
+                print 'RENAME:', diff.a_path, diff.b_path
+
                 entry = db.File.query.filter_by(path=diff.a_path).one()
                 entry.path = diff.b_path
-                print 'RENAME:', entry
-            else:
+            elif diff.modified_file:
                 # file was modified; re-post to blog.
+                print 'MODIFY:', diff.a_path
                 entry = db.File.query.filter_by(path=diff.a_path).one()
-                print 'MODIFY:', entry
+                if not entry:
+                    print >>sys.stderr, 'File not found in database:', diff.a_path
+                    continue
+                doc = rstdoc.RSTDoc(diff.a_path)
+                post = myblog.get_post(entry.post_id)
+                myblog.update_post(post, doc)
+                entry.last_commit_id = new
+            else:
+                print 'UNKNOWN'
 
         db.session.commit()
 

@@ -9,13 +9,13 @@ class AttrDict (dict):
         try:
             return self[k]
         except KeyError:
-            raise AttributeError(k)
+            return None
 
 def diff_tree(repo, a, b):
     if a == '0'*40:
         a = '--root'
 
-    text = repo.git.diff_tree('-M', a, b)
+    text = repo.git.diff_tree('-M', '-r', a, b)
     return list_from_diff_tree(text)
 
 def list_from_diff_tree(text):
@@ -32,6 +32,17 @@ def list_from_diff_tree(text):
                 diff[field] = parts.pop(0)
             except IndexError:
                 break
+
+        status = diff['status'][0]
+        if status == 'D':
+            diff['deleted_file'] = True
+        elif status == 'R':
+            diff['renamed_file'] = True
+        elif status == 'A':
+            diff['new_file'] = True
+        elif status == 'M':
+            diff['modified_file'] = True
+
         diffs.append(diff)
 
     return diffs
