@@ -1,9 +1,8 @@
-===========
-Test Post 1
-===========
+=========
+Test Post
+=========
 
 :Tags: test post python blogger
-:Summary: This is a test.  This is only a test.  Do not be alarmed.
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque egestas
 turpis quis nisl dictum vehicula venenatis vel neque. Nullam purus purus,

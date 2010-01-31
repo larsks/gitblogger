@@ -7,11 +7,18 @@ mkdir repo1 repo2
 	echo "=== repo1 ==="
 	cd repo1
 	git init
-	ln -s ../../../../gitblogger/gitblogger.py .git/hooks/post-receive
+	git config receive.denyCurrentBranch ignore
+	cat >> .git/hooks/post-receive <<-EOF
+	#!/bin/sh
+
+	../../../runtime/bin/python ../../../gitblogger/gitblogger.py
+	EOF
+
+	chmod 755 .git/hooks/post-receive
 )
 
 cat conf >> repo1/.git/config
-cp post*.rst repo2/
+cp post1.rst repo2/
 
 (
 	echo "=== repo2 ==="
@@ -24,3 +31,10 @@ cp post*.rst repo2/
 	git push origin master
 )
 
+cp post2.rst repo2/post1.rst
+
+(
+	cd repo2
+	git ci -m 'revised post1' post1.rst
+	git push
+)
