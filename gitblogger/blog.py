@@ -39,14 +39,16 @@ class Blog (object):
         if not self.blog:
             raise NoSuchBlogError(self.blog_name)
 
-    def add_post(self, doc, draft=False):
+    def add_post(self, doc, draft=None):
+        if draft is None:
+            draft = doc.docinfo.get('draft', 'False') == 'True'
+
         return self.client.add_post(
                 self.blog_id,
                 doc.title,
                 doc.content,
                 labels=doc.docinfo.get('tags', '').split(),
                 draft=draft)
-
 
     def get_post(self, post_id):
         return self.client.get_feed(
