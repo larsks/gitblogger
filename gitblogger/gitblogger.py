@@ -16,6 +16,7 @@ from  blog import Blog
 from rstdoc import RSTDoc
 
 class GitError(Exception):
+    '''Base class for all exceptions raised by this module.'''
     pass
 
 class NoConfigurationError(GitError):
@@ -58,6 +59,10 @@ class GitBlogger (object):
                         self.config)
 
     def post_receive(self):
+        '''Called from git repository's post-receive hook.  Uses
+        diff-tree to get a list of changes between current and previous
+        commit.'''
+
         self.log.info('Resetting repository (sync to index).')
         self.repo.git.reset('--hard')
         refs = self.config.get('refs',
@@ -90,6 +95,8 @@ class GitBlogger (object):
             db.session.commit()
 
     def handle_delete(self, diff):
+        '''Called for deleted files (status=D). Delete post from blog,
+        if it exists, and then delete post from local database.'''
 
         self.log.warn('DELETE %(a_path)s.' % diff)
         try:
@@ -112,6 +119,9 @@ class GitBlogger (object):
         entry.delete()
 
     def handle_new(self, diff):
+        '''Called for new files (status=A).  Post to blog and create
+        entry in local database.'''
+
         self.log.warn('NEW %(a_path)s.' % diff)
 
         doc = RSTDoc(diff.a_path)
@@ -127,6 +137,11 @@ class GitBlogger (object):
                 % (entry.path, entry.post_id, doc.title))
 
     def handle_modify(self, diff):
+        '''Called for modified files (status=M).  Update blog content and
+        update last update time in local database.  If the file doesn't
+        appear in the local database, treat this as a new file and hand
+        things of to self.handle_new(...).'''
+
         self.log.warn('MODIFY %(a_path)s.' % diff)
 
         try:
@@ -143,6 +158,10 @@ class GitBlogger (object):
         entry.updated = datetime.datetime.utcnow()
 
     def handle_rename(self, diff):
+        '''Called for renamed files (status=R).  Update entry 
+        in local database.  If no entry appears in local database, treat
+        as a new file and hand off to self.handle_new(...).'''
+
         self.log.warn('RENAME %(a_path)s -> %(b_path)s.' % diff)
 
         try:
@@ -155,6 +174,9 @@ class GitBlogger (object):
             return self.handle_new(self, diff)
 
     def update_last_commit_id (self, commit_id):
+        '''Updates (or creates) the last_commit_id value in the
+        database.'''
+
         try:
             entry = db.Metadata.query.filter_by(name='last_commit_id').one()
             entry.value = commit_id

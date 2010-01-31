@@ -4,6 +4,8 @@ fields = [ 'a_mode', 'b_mode', 'a_sha', 'b_sha', 'status',
         'a_path', 'b_path' ]
 
 class AttrDict (dict):
+    '''A dictionary that allows simple attribute access (foo.bar) to
+    dictionary keys.  Does nothing but save a little typing.'''
 
     def __getattr__(self, k):
         try:
@@ -19,6 +21,8 @@ def diff_tree(repo, a, b):
     return list_from_diff_tree(text, a, b)
 
 def list_from_diff_tree(text, old_commit_id, new_commit_id):
+    '''Turn the output of ``git diff-tree`` into a list of dictionaries.'''
+
     diffs = []
 
     for line in text.split('\n'):
