@@ -16,9 +16,9 @@ def diff_tree(repo, a, b):
         a = '--root'
 
     text = repo.git.diff_tree('-M', '-r', a, b)
-    return list_from_diff_tree(text)
+    return list_from_diff_tree(text, a, b)
 
-def list_from_diff_tree(text):
+def list_from_diff_tree(text, old_commit_id, new_commit_id):
     diffs = []
 
     for line in text.split('\n'):
@@ -26,6 +26,8 @@ def list_from_diff_tree(text):
             continue
         
         diff = AttrDict()
+        diff['old_commit_id'] = old_commit_id
+        diff['new_commit_id'] = new_commit_id
         parts = line.split()
         for field in fields:
             try:

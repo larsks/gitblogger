@@ -1,5 +1,6 @@
 import os
 import sys
+import logging
 
 import gdata.blogger.client
 import gdata.blogger.data
@@ -14,10 +15,12 @@ class NoSuchBlogError (BlogError):
 class Blog (object):
 
     def __init__ (self, config):
-        config = config['gitblogger']
         self.config = config
+        self.log = logging.getLogger('gitblogger.blog')
         self.blog_name = config['blog']
 
+        self.log.info('Connecting to %(blog)s as %(username)s.' %
+                config)
         self.client = gdata.blogger.client.BloggerClient()
         self.client.client_login(
                 config['username'],

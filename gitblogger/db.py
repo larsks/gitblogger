@@ -1,3 +1,4 @@
+import logging
 from elixir import *
 
 class File (Entity):
@@ -14,4 +15,13 @@ class Metadata (Entity):
 
     name        = Field(String(80), unique=True)
     value       = Field(String)
+
+def init(uri, echo=False):
+    global metadata
+    log = logging.getLogger('gitblogger.db')
+    log.info('Connecting to %s.' % uri)
+    metadata.bind = uri
+    metadata.bind.echo = echo
+    setup_all()
+    create_all()
 
