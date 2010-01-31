@@ -19,9 +19,12 @@ class GitError(Exception):
     pass
 
 class NoConfigurationError(GitError):
+    '''Raised if there is no [gitblogger] section in the config
+    file.'''
     pass
 
 class ConfigurationError(GitError):
+    '''Raised in the event of an invalid configuration.'''
     pass
 
 class GitBlogger (object):
@@ -87,9 +90,11 @@ class GitBlogger (object):
             db.session.commit()
 
     def handle_delete(self, diff):
+
         self.log.warn('DELETE %(a_path)s.' % diff)
-        entry = db.File.query.filter_by(path=diff.a_path).one()
-        if not entry:
+        try:
+            entry = db.File.query.filter_by(path=diff.a_path).one()
+        except sqlalchemy.orm.exc.NoResultFound:
             self.log.error('File not found in database: %(a_path)s' % diff)
             return
 
@@ -123,9 +128,11 @@ class GitBlogger (object):
 
     def handle_modify(self, diff):
         self.log.warn('MODIFY %(a_path)s.' % diff)
-        entry = db.File.query.filter_by(path=diff.a_path).one()
-        if not entry:
-            sys.log.warn('File %(a_path)s not found in database.' % diff)
+
+        try:
+            entry = db.File.query.filter_by(path=diff.a_path).one()
+        except sqlalchemy.orm.exc.NoResultFound:
+            self.log.warn('File %(a_path)s not found in database.' % diff)
             self.log.warn('Treating %(a_path)s as a new file.' % diff)
             return self.handle_new(diff)
 
@@ -137,11 +144,11 @@ class GitBlogger (object):
 
     def handle_rename(self, diff):
         self.log.warn('RENAME %(a_path)s -> %(b_path)s.' % diff)
-        entry = db.File.query.filter_by(path=diff.a_path).one()
 
-        if entry:
+        try:
+            entry = db.File.query.filter_by(path=diff.a_path).one()
             entry.path = diff.b_path
-        else:
+        except sqlalchemy.orm.exc.NoResultFound:
             self.log.warn('No entry in database for %(a_path)s.' % diff)
             self.log.warn('Treating %(b_path)s as a new file.' % diff)
             diff.a_path = diff.b_path
