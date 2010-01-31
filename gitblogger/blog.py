@@ -62,6 +62,13 @@ class Blog (object):
 
         post.title = atom.data.Title(type='text', text=doc.title)
         post.content = atom.data.Content(type='html', text=doc.content)
+
+        if post.control \
+                and post.control.draft \
+                and post.control.draft.text == 'yes' \
+                and doc.docinfo.get('draft', 'False') == 'False':
+            post.control.draft.text = 'no'
+
         for tag in doc.docinfo.get('tags', '').split():
             post.add_label(tag)
         return self.client.update(post)
