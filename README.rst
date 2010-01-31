@@ -20,12 +20,45 @@ in general and git_ in particular.  I like being able to track my changes
 over time, I like using a `real editor`_ on my posts, and I like having
 things happen with the smallest amount of manual intervention possibe.
 
+Requirements
+============
+
+Requirements that should be installed automatically if you use easy_install
+---------------------------------------------------------------------------
+
+- SQLAlchemy_
+- Elixir_
+- configdict_
+
+Requirements that you will need to provide manually
+---------------------------------------------------
+
+- `Google gdata API`_
+
+.. _sqlalchemy: http://www.sqlalchemy.org/
+.. _elixir: http://elixir.ematia.de/trac/wiki
+.. _configdict: http://github.com/larsks/configdict
+.. _google gdata api: http://code.google.com/p/gdata-python-client/
+
+Installation
+============
+
+#. Install gdata library.
+
+#. Install gitblogger::
+
+     python setup.py install
+
+#. Add `gitblogger-post-receive` as the `post-receive` hook
+   to a git repository that receives
+   pushes from your working tree,
+
 Configuration
 =============
 
-Gitblogger needs a configuration file to provide some critical information.
 You need to provide credentials for authenticating to Google, the name of
-your blog, and the refs gitblogger should be watching.
+your blog, and the refs gitblogger should be watching.  Add a 
+``[gitblogger]]`` to your ``.git/config`` configuration file.
 
 For example::
 
