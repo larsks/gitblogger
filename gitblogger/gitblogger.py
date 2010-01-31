@@ -3,12 +3,12 @@
 import os
 import sys
 import optparse
-import git
-import subprocess
 import datetime
+import logging
 from cStringIO import StringIO
 
 from configdict import ConfigDict
+import git
 
 import db
 import blog
