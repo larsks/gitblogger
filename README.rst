@@ -9,6 +9,8 @@ Gitblogger lets you write blog entries in reStructuredText_ (RST) and posts
 (or updates) them automatically to a Blogger blog when you push them to a
 repository.
 
+The code is a little rough around the edges, but it seems to work.
+
 And why would you want to do that?
 ==================================
 
