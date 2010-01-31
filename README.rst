@@ -70,8 +70,6 @@ For example::
   password  = secret
   blog      = Your Blog Title
 
-  refs      = refs/head/master
-
 .. _restructuredtext: http://docutils.sourceforge.net/rst.html
 .. _real editor: http://www.vim.org/
 .. _git: http://git-scm.org/
