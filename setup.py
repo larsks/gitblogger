@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(name='gitblogger',
-        version='20100130.2',
+        version='20100130.3',
         install_requires=[
             'gitpython',
             'elixir',
