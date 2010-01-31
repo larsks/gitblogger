@@ -70,9 +70,9 @@ class GitBlogger (object):
             self.log.debug('new commit id: %s' % new)
 
             for diff in utils.diff_tree(self.repo, old, new):
-#                if not diff.a_path.endswith('.rst'):
-#                    self.log.warn('Unknown extension (skipping): %(a_path)s' % diff)
-#                    continue
+                if not diff.a_path.endswith('.rst'):
+                    self.log.warn('Unknown extension (skipping): %(a_path)s' % diff)
+                    continue
 
                 if diff.deleted_file:
                     self.handle_delete(diff)
