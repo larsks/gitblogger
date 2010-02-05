@@ -5,7 +5,7 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 setup(name='gitblogger',
-        version='20100130.3',
+        version='20100205.1',
         install_requires=[
             'gitpython',
             'elixir',
