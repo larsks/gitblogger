@@ -70,7 +70,7 @@ class Blog (object):
         '''
 
         if draft is None:
-            draft = doc.docinfo.get('draft', 'False') == 'True'
+            draft = doc.docinfo.get('draft', 'false').lower() == 'true'
 
         return self.client.add_post(
                 self.blog_id,
