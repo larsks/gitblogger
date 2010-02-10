@@ -30,8 +30,6 @@ class Blog (object):
         self.log = logging.getLogger('gitblogger.blog')
         self.blog_name = config['blog']
 
-        print 'CONFIG:', self.config
-
         self.connect()
         self.find_blog()
 
