@@ -1,5 +1,5 @@
 #!/usr/bin/python
 
-import gitblogger
+import gitblogger.gitblogger
 gitblogger.gitblogger.post_receive_main()
 
