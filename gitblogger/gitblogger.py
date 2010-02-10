@@ -106,7 +106,7 @@ class GitBlogger (object):
             return
 
         if entry.post_id:
-            post = myblog.get_post(entry.post_id)
+            post = self.blog.get_post(entry.post_id)
             if not post:
                 self.log.warn('Post id %s not found on log.' %
                         entry.post_id)
