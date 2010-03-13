@@ -1,0 +1,90 @@
+#!/usr/bin/python
+
+import os
+import sys
+import optparse
+import logging
+
+import sqlalchemy
+from sqlalchemy.orm.exc import *
+import baker
+from configdict import ConfigDict
+from gitblogger.blog import Blog
+from gitblogger import db
+
+import gdata
+
+logging.basicConfig(level=logging.INFO)
+
+def parse_args():
+    p = optparse.OptionParser()
+    p.add_option('-f', '--config')
+
+    return p.parse_args()
+
+@baker.command
+def list():
+    '''Produce a list of post ids, titles, and linked document (if
+    available).'''
+    
+    global blog
+
+    base=1
+    # It's not mentioned explicitly anywhere, but Google only returns
+    # <n> results at a time, and you must page through the results
+    # to get all the entries.
+    while True:
+        posts = blog.get_posts(gdata.blogger.client.Query(start_index=base))
+        if not posts.entry:
+            break
+        base += len(posts.entry)
+        for entry in posts.entry:
+            post_id = entry.get_post_id()
+            print '%-25s' % post_id, entry.published.text, \
+                unicode(entry.title.text).encode('utf-8')
+
+            try:
+                link = db.File.query.filter_by(post_id=post_id).one()
+                print '%-25s' % '', link.path
+            except sqlalchemy.orm.exc.NoResultFound:
+                print '%-25s' % '', '-'
+
+@baker.command
+def link(postid, path):
+    print 'Linking %s to %s.' % (postid, path)
+    entry = db.File(
+            path = path,
+            post_id = postid,
+            )
+    db.session.commit()
+
+@baker.command
+def unlink(what, post=False):
+    try:
+        if post:
+            link = db.File.query.filter_by(post_id=what).one()
+        else:
+            link = db.File.query.filter_by(path=what).one()
+    except sqlalchemy.orm.exc.NoResultFound:
+        print 'ERROR: no match for %s.' % what
+        sys.exit(1)
+
+    print 'Unlinking %s from %s.' % (link.post_id, link.path)
+    link.delete()
+    db.session.commit()
+
+if __name__ == '__main__':
+    global blog
+
+    opts, args = parse_args()
+
+    cf = ConfigDict(opts.config)
+    if not 'gitblogger' in cf:
+        print >>sys.stderr, 'ERROR: Missing configuration.'
+        sys.exit(1)
+    blog = Blog(cf['gitblogger'])
+    db.init(cf['gitblogger'].get('database uri',
+        'sqlite:///%s/gitblogger.sqlite' % os.getcwd()))
+
+    baker.run(argv=['gitblogger'] + args)
+

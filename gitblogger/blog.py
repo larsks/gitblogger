@@ -58,6 +58,8 @@ class Blog (object):
         if not self.blog:
             raise NoSuchBlogError(self.blog_name)
 
+        self.log.info('Found blog id %s' % self.blog_id)
+
     def add_post(self, doc, draft=None):
         '''Add a post to the blog.  ``doc`` is a document object that
         provides the following attributes:
@@ -86,11 +88,11 @@ class Blog (object):
                 auth_token=self.client.auth_token,
                 desired_class=gdata.blogger.data.BlogPost)
 
-    def get_posts(self):
+    def get_posts(self, *args, **kwargs):
         '''Like gdata.blogger.client.BloggerClient.get_posts(), but
         blog_id is provided automatically.'''
 
-        return self.client.get_posts(self.blog_id)
+        return self.client.get_posts(self.blog_id, *args, **kwargs)
         
     def update_post(self, post, doc):
         '''Update title, content, and tags of the given document.  Note 
