@@ -17,6 +17,7 @@ setup(name='gitblogger',
         author='Lars Kellogg-Stedman',
         author_email='lars@oddbit.com',
         packages=['gitblogger'],
-        scripts=['scripts/gitblogger-post-receive',],
+        scripts=['scripts/gitblogger-post-receive',
+            'scripts/gitblogger',],
         )
 
