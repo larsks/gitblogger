@@ -4,6 +4,7 @@ import os
 import sys
 import optparse
 import logging
+import datetime
 
 import sqlalchemy
 from sqlalchemy.orm.exc import *
@@ -11,6 +12,7 @@ import baker
 from configdict import ConfigDict
 from gitblogger.blog import Blog
 from gitblogger import db
+from gitblogger.rstdoc import RSTDoc
 
 import gdata
 
@@ -71,6 +73,20 @@ def unlink(what, post=False):
 
     print 'Unlinking %s from %s.' % (link.post_id, link.path)
     link.delete()
+    db.session.commit()
+
+@baker.command
+def publish(path):
+    try:
+        entry = db.File.query.filter_by(path=path).one()
+    except sqlalchemy.orm.exc.NoResultFound:
+        print 'ERROR: no match for %s.' % path
+        sys.exit(1)
+
+    doc = RSTDoc(path)
+    blog.update_post(post_id, doc)
+    entry.last_commit_id = None
+    entry.updated = datetime.datetime.utcnow()
     db.session.commit()
 
 if __name__ == '__main__':
