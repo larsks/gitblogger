@@ -122,6 +122,13 @@ class GitBlogger (object):
         '''Called for new files (status=A).  Post to blog and create
         entry in local database.'''
 
+        try:
+            entry = db.File.query.filter_by(path=diff.a_path).one()
+            if entry:
+                return handle_modify(diff)
+        except sqlalchemy.orm.exc.NoResultFound:
+            pass
+
         self.log.warn('NEW %(a_path)s.' % diff)
 
         doc = RSTDoc(diff.a_path)
