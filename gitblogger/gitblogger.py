@@ -125,7 +125,7 @@ class GitBlogger (object):
         try:
             entry = db.File.query.filter_by(path=diff.a_path).one()
             if entry:
-                return handle_modify(diff)
+                return self.handle_modify(diff)
         except sqlalchemy.orm.exc.NoResultFound:
             pass
 
