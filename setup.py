@@ -5,12 +5,13 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 setup(name='gitblogger',
-        version='20100218.1',
+        version='20100313.1',
         install_requires=[
             'gitpython',
             'elixir',
             'sqlalchemy',
             'configdict',
+            'baker',
             ],
         description='Publish reStructuredText documents to Blogger from a Git repository.',
         long_description=read('README.rst'),
